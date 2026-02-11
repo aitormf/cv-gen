@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>{{ css | safe }}</style>
+</head>
+<body>
+    <header class="header">
+        <h1 class="name">{{ contact.name }}</h1>
+        {% if contact.title %}
+        <p class="title">{{ contact.title }}</p>
+        {% endif %}
+        <p class="contact-line">
+            {% set items = [] %}
+            {% if contact.email %}{% set _ = items.append(contact.email) %}{% endif %}
+            {% if contact.phone %}{% set _ = items.append(contact.phone) %}{% endif %}
+            {% if contact.location %}{% set _ = items.append(contact.location) %}{% endif %}
+            {% if contact.linkedin %}{% set _ = items.append(contact.linkedin) %}{% endif %}
+            {% if contact.github %}{% set _ = items.append(contact.github) %}{% endif %}
+            {% if contact.website %}{% set _ = items.append(contact.website) %}{% endif %}
+            {{ items | join(' · ') }}
+        </p>
+    </header>
+
+    {% for section in sections %}
+    <section class="cv-section">
+        <h2 class="section-heading">{{ section.heading }}</h2>
+        <div class="section-content">{{ section.content_html | safe }}</div>
+    </section>
+    {% endfor %}
+</body>
+</html>

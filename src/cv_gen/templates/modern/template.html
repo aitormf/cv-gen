@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>{{ css | safe }}</style>
+</head>
+<body>
+    <div class="page">
+        <aside class="sidebar">
+            {% if contact.photo %}
+            <div class="photo-wrapper">
+                <img src="{{ contact.photo }}" alt="{{ contact.name }}" class="photo">
+            </div>
+            {% endif %}
+
+            <div class="identity">
+                <h1 class="name">{{ contact.name }}</h1>
+                {% if contact.title %}
+                <p class="title">{{ contact.title }}</p>
+                {% endif %}
+            </div>
+
+            <div class="contact-info">
+                {% if contact.email %}
+                <div class="contact-item">
+                    <span class="icon">&#9993;</span>
+                    <span>{{ contact.email }}</span>
+                </div>
+                {% endif %}
+                {% if contact.phone %}
+                <div class="contact-item">
+                    <span class="icon">&#9742;</span>
+                    <span>{{ contact.phone }}</span>
+                </div>
+                {% endif %}
+                {% if contact.location %}
+                <div class="contact-item">
+                    <span class="icon">&#9873;</span>
+                    <span>{{ contact.location }}</span>
+                </div>
+                {% endif %}
+                {% if contact.linkedin %}
+                <div class="contact-item">
+                    <span class="icon">&#128279;</span>
+                    <span>{{ contact.linkedin }}</span>
+                </div>
+                {% endif %}
+                {% if contact.github %}
+                <div class="contact-item">
+                    <span class="icon">&#128187;</span>
+                    <span>{{ contact.github }}</span>
+                </div>
+                {% endif %}
+                {% if contact.website %}
+                <div class="contact-item">
+                    <span class="icon">&#127760;</span>
+                    <span>{{ contact.website }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            {% for section in sidebar_sections %}
+            <div class="sidebar-section">
+                <h2 class="sidebar-heading">{{ section.heading }}</h2>
+                <div class="sidebar-content">{{ section.content_html | safe }}</div>
+            </div>
+            {% endfor %}
+        </aside>
+
+        <main class="main-content">
+            {% for section in main_sections %}
+            <section class="cv-section">
+                <h2 class="section-heading">{{ section.heading }}</h2>
+                <div class="section-content">{{ section.content_html | safe }}</div>
+            </section>
+            {% endfor %}
+        </main>
+    </div>
+</body>
+</html>
