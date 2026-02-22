@@ -251,6 +251,75 @@ def test_multipage_consistent_top_bottom_margins(template_name):
     assert page_margin_bottom > 0, "Bottom page margin is 0 — content would touch the edge"
 
 
+def test_minimal_profile_not_isolated_on_first_page():
+    """Profile section must not be the only content on page 1.
+
+    When break-inside: avoid is applied to entire sections, a long experience
+    section gets pushed completely to page 2, leaving the profile alone on
+    page 1 with a large blank gap. This test verifies that experience content
+    starts on page 1 alongside the profile.
+    """
+    experience_items = "".join(
+        f"<h3>Engineer {i} | Company {i} | 20{10+i}-20{11+i}</h3>"
+        f"<ul>{''.join(f'<li>Achievement {j} at this role</li>' for j in range(4))}</ul>"
+        for i in range(5)
+    )
+
+    cv = CVData(
+        contact=ContactInfo(name="Test", title="Dev", email="test@example.com"),
+        sections=[
+            Section(
+                heading="Perfil Profesional",
+                slug="perfil",
+                content_html="<p>Short professional summary that fits easily on one line.</p>",
+                section_type="profile",
+            ),
+            Section(
+                heading="Experiencia",
+                slug="experiencia",
+                content_html=experience_items,
+                section_type="experience",
+            ),
+        ],
+    )
+
+    html = render_html(cv, "minimal")
+    doc = _render_doc(html, "minimal")
+
+    assert len(doc.pages) >= 2, "Expected multiple pages for this CV"
+
+    # Page 1 must have content from the experience section, not just the profile.
+    # If only the profile is on page 1, the bottom of all content on that page
+    # would be well under 30% of the page height (profile is just one line).
+    # Experience starting on page 1 means content extends much further down.
+    page1 = doc.pages[0]
+
+    def get_all_boxes(box):
+        yield box
+        if hasattr(box, "children"):
+            for child in box.children:
+                yield from get_all_boxes(child)
+
+    max_y = 0
+    for box in get_all_boxes(page1._page_box):
+        if hasattr(box, "position_y") and hasattr(box, "height") and box.height:
+            bottom = box.position_y + box.height
+            if bottom > max_y:
+                max_y = bottom
+
+    # A4 height ≈ 842pt. 30mm top+bottom margins ≈ 85pt each.
+    # A profile-only page would have content ending around 15–20% of page height.
+    # Threshold at 40% ensures experience content is present on page 1.
+    a4_height_pt = 297 / 25.4 * 72
+    threshold = a4_height_pt * 0.40
+
+    assert max_y > threshold, (
+        f"Page 1 appears to contain only the profile section (max_y={max_y:.1f}pt, "
+        f"threshold={threshold:.1f}pt). The experience section was likely pushed "
+        f"entirely to page 2 due to break-inside: avoid on the section container."
+    )
+
+
 def test_modern_no_white_margin_on_left_or_right():
     """The modern template must have zero left/right page margin so the sidebar
     background (via @page background) covers the full width of the sheet with no
