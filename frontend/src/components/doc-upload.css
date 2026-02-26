@@ -1,0 +1,33 @@
+:host {
+  display: inline-block;
+}
+
+.upload-btn {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  background: #313244;
+  color: #cdd6f4;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.upload-btn:hover:not(:disabled) {
+  border-color: #89b4fa;
+}
+
+.upload-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-btn--converting {
+  color: #f9e2af;
+  border-color: #f9e2af;
+}
+
+.upload-btn--error {
+  color: #f38ba8;
+  border-color: #f38ba8;
+}

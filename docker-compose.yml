@@ -1,8 +1,7 @@
 services:
   backend:
     build: ./backend
-    environment:
-      - CORS_ORIGIN=http://localhost
+    env_file: .env
     restart: unless-stopped
 
   frontend:

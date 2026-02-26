@@ -21,3 +21,21 @@ export function downloadBlob(url, filename) {
   a.download = filename
   a.click()
 }
+
+export async function checkAiStatus() {
+  const res = await fetch('/api/ai/status')
+  if (!res.ok) return { available: false }
+  return res.json()
+}
+
+export async function convertDocument(file) {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await fetch('/api/ai/convert', { method: 'POST', body: form })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.detail || `Conversion failed: ${res.status}`)
+  }
+  const data = await res.json()
+  return data.markdown
+}
