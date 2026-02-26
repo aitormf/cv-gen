@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      - CORS_ORIGIN=http://localhost
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

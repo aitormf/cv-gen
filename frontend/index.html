@@ -4,9 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>cv-gen</title>
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="app" class="app">
+      <header>
+        <h1>cv-gen</h1>
+        <template-selector></template-selector>
+      </header>
+      <div class="panels">
+        <section class="editor">
+          <markdown-editor></markdown-editor>
+        </section>
+        <section class="preview">
+          <pdf-preview></pdf-preview>
+        </section>
+      </div>
+    </div>
+    <script type="module" src="/src/app.js"></script>
   </body>
 </html>

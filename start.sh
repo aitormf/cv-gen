@@ -13,11 +13,11 @@ set +a
 rm -f "$PIDFILE"
 
 echo "==> Installing dependencies..."
-uv sync --quiet
+(cd "$ROOT/backend" && uv sync --quiet)
 (cd "$ROOT/frontend" && pnpm install --silent)
 
 echo "==> Starting backend (port $BACKEND_PORT)..."
-uv run uvicorn cv_gen.api:app --reload --port "$BACKEND_PORT" &
+(cd "$ROOT/backend" && uv run uvicorn cv_gen.api:app --reload --port "$BACKEND_PORT") &
 echo $! >> "$PIDFILE"
 
 echo "==> Starting frontend (port $FRONTEND_PORT)..."
