@@ -95,6 +95,15 @@ html, body {
     text-align: center;
     color: #3498db;
     font-size: 9pt;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-item .icon svg {
+    width: 3.5mm;
+    height: 3.5mm;
+    fill: #3498db;
 }
 
 /* Sidebar sections */
