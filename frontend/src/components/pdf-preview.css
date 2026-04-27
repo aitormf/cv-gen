@@ -30,6 +30,7 @@ iframe {
   padding: 0.75rem 1rem;
   background: #181825;
   border-top: 1px solid #313244;
+  flex-shrink: 0;
 }
 
 .generate-btn,

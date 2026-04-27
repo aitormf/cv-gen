@@ -28,6 +28,20 @@ export async function checkAiStatus() {
   return res.json()
 }
 
+export async function adaptCV(markdown, jobOffer) {
+  const res = await fetch('/api/ai/adapt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ markdown, job_offer: jobOffer }),
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.detail || `Adaptation failed: ${res.status}`)
+  }
+  const data = await res.json()
+  return data.markdown
+}
+
 export async function convertDocument(file) {
   const form = new FormData()
   form.append('file', file)

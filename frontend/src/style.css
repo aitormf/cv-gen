@@ -23,6 +23,7 @@ header {
   padding: 0.75rem 1.5rem;
   background: #181825;
   border-bottom: 1px solid #313244;
+  flex-shrink: 0;
 }
 
 header h1 {
@@ -36,13 +37,105 @@ header h1 {
   grid-template-columns: 1fr 1fr;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
+/* Left panel */
 .editor {
+  display: flex;
+  flex-direction: column;
   border-right: 1px solid #313244;
-  overflow: auto;
+  overflow: hidden;
+  min-height: 0;
 }
 
+/* Editor tabs */
+.editor-tabs {
+  display: flex;
+  flex-shrink: 0;
+  background: #181825;
+  border-bottom: 1px solid #313244;
+}
+
+.editor-tabs .tab-btn {
+  padding: 0.55rem 1.1rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6c7086;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.editor-tabs .tab-btn.active {
+  color: #89b4fa;
+  border-bottom-color: #89b4fa;
+}
+
+.editor-tabs .tab-btn:hover:not(.active) {
+  color: #cdd6f4;
+}
+
+/* Editor panels */
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-panel[hidden] {
+  display: none;
+}
+
+/* Make markdown-editor fill available space above job-adapt */
+markdown-editor {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* job-adapt always visible at bottom, never pushed out */
+job-adapt {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Adapted markdown textarea */
+.adapted-markdown-editor {
+  flex: 1;
+  width: 100%;
+  resize: none;
+  border: none;
+  padding: 1rem;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  outline: none;
+  tab-size: 2;
+  min-height: 0;
+}
+
+.adapted-markdown-editor::placeholder {
+  color: #585b70;
+}
+
+/* Right panel */
 .preview {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+pdf-preview {
+  display: block;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }

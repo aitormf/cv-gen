@@ -15,7 +15,17 @@
       </header>
       <div class="panels">
         <section class="editor">
-          <markdown-editor></markdown-editor>
+          <div class="editor-tabs" hidden>
+            <button class="tab-btn active" data-tab="original">Original</button>
+            <button class="tab-btn" data-tab="adapted">Adaptado</button>
+          </div>
+          <div class="editor-panel editor-panel--original">
+            <markdown-editor></markdown-editor>
+            <job-adapt hidden></job-adapt>
+          </div>
+          <div class="editor-panel editor-panel--adapted" hidden>
+            <textarea class="adapted-markdown-editor" spellcheck="false" placeholder="El CV adaptado aparecerá aquí..."></textarea>
+          </div>
         </section>
         <section class="preview">
           <pdf-preview></pdf-preview>

@@ -112,6 +112,37 @@ async def ai_convert(file: UploadFile) -> dict:
     return {"markdown": _strip_code_fences(raw)}
 
 
+# --- AI CV adaptation ---
+
+
+class AdaptRequest(BaseModel):
+    markdown: str
+    job_offer: str
+
+
+@app.post("/api/ai/adapt")
+async def ai_adapt(req: AdaptRequest) -> dict:
+    if not is_ai_configured():
+        raise HTTPException(503, "AI adaptation is not configured")
+    if not req.markdown.strip():
+        raise HTTPException(400, "CV markdown is empty")
+    if not req.job_offer.strip():
+        raise HTTPException(400, "Job offer text is empty")
+
+    from cv_gen.ai.prompt import ADAPT_SYSTEM_PROMPT, build_adapt_user_prompt
+
+    provider = get_provider()
+    user_text = build_adapt_user_prompt(req.markdown, req.job_offer)
+
+    try:
+        raw = await provider.complete(ADAPT_SYSTEM_PROMPT, user_text)
+    except Exception:
+        logger.exception("AI adaptation failed")
+        raise HTTPException(502, "AI adaptation failed")
+
+    return {"markdown": _strip_code_fences(raw)}
+
+
 # --- Production: serve frontend build ---
 
 FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
