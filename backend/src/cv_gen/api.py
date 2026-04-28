@@ -7,13 +7,17 @@ import os
 import re
 from pathlib import Path
 
+import asyncio
+from collections import defaultdict
+from time import time
+
 import weasyprint
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from cv_gen.ai.providers import get_provider, is_ai_configured
 from cv_gen.extractors import SUPPORTED_EXTENSIONS, extract_text, get_extension
@@ -26,6 +30,35 @@ load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 CORS_ORIGIN = os.getenv("CORS_ORIGIN", "http://localhost:5173")
 
+
+class _SlidingWindowLimiter:
+    """In-memory sliding window rate limiter (per IP)."""
+
+    def __init__(self, limit: int, window: int) -> None:
+        self._limit = limit
+        self._window = window  # seconds
+        self._buckets: dict[str, list[float]] = defaultdict(list)
+        self._lock = asyncio.Lock()
+
+    async def check(self, key: str) -> bool:
+        async with self._lock:
+            now = time()
+            self._buckets[key] = [t for t in self._buckets[key] if now - t < self._window]
+            if len(self._buckets[key]) >= self._limit:
+                return False
+            self._buckets[key].append(now)
+            return True
+
+
+_ai_limiter = _SlidingWindowLimiter(limit=10, window=60)
+
+
+async def _ai_rate_limit(request: Request) -> None:
+    key = request.client.host if request.client else "unknown"
+    if not await _ai_limiter.check(key):
+        raise HTTPException(429, "Too many requests — please wait before trying again.")
+
+
 app = FastAPI(title="cv-gen")
 
 app.add_middleware(
@@ -37,7 +70,7 @@ app.add_middleware(
 
 
 class RenderRequest(BaseModel):
-    markdown: str
+    markdown: str = Field(..., max_length=20_000)
     template: str = "modern"
 
 
@@ -78,13 +111,17 @@ def ai_status() -> dict:
 
 
 @app.post("/api/ai/convert")
-async def ai_convert(file: UploadFile) -> dict:
+async def ai_convert(request: Request, file: UploadFile) -> dict:
+    await _ai_rate_limit(request)
     if not is_ai_configured():
         raise HTTPException(503, "AI conversion is not configured")
 
     content = await file.read()
     if not content:
         raise HTTPException(400, "Empty file")
+
+    if len(content) > 10 * 1024 * 1024:  # 10 MB
+        raise HTTPException(400, "File too large (max 10 MB)")
 
     filename = file.filename or ""
     ext = get_extension(filename)
@@ -126,12 +163,13 @@ def _parse_adapt_response(raw: str) -> tuple[str, str]:
 
 
 class AdaptRequest(BaseModel):
-    markdown: str
-    job_offer: str
+    markdown: str = Field(..., max_length=15_000)
+    job_offer: str = Field(..., max_length=8_000)
 
 
 @app.post("/api/ai/adapt")
-async def ai_adapt(req: AdaptRequest) -> dict:
+async def ai_adapt(request: Request, req: AdaptRequest) -> dict:
+    await _ai_rate_limit(request)
     if not is_ai_configured():
         raise HTTPException(503, "AI adaptation is not configured")
     if not req.markdown.strip():
