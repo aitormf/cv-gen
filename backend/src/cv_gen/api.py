@@ -112,7 +112,17 @@ async def ai_convert(file: UploadFile) -> dict:
     return {"markdown": _strip_code_fences(raw)}
 
 
-# --- AI CV adaptation ---
+# --- AI CV adaptation + suggestions ---
+
+
+def _parse_adapt_response(raw: str) -> tuple[str, str]:
+    """Split the combined AI response into adapted markdown and suggestions."""
+    if "===CV_ADAPTED===" in raw and "===SUGGESTIONS===" in raw:
+        after_adapted = raw.split("===CV_ADAPTED===", 1)[1]
+        adapted_part, suggestions_part = after_adapted.split("===SUGGESTIONS===", 1)
+        return _strip_code_fences(adapted_part.strip()), suggestions_part.strip()
+    # Fallback: treat whole response as adapted CV, no suggestions
+    return _strip_code_fences(raw), ""
 
 
 class AdaptRequest(BaseModel):
@@ -129,18 +139,19 @@ async def ai_adapt(req: AdaptRequest) -> dict:
     if not req.job_offer.strip():
         raise HTTPException(400, "Job offer text is empty")
 
-    from cv_gen.ai.prompt import ADAPT_SYSTEM_PROMPT, build_adapt_user_prompt
+    from cv_gen.ai.prompt import ADAPT_AND_SUGGEST_SYSTEM_PROMPT, build_adapt_user_prompt
 
     provider = get_provider()
     user_text = build_adapt_user_prompt(req.markdown, req.job_offer)
 
     try:
-        raw = await provider.complete(ADAPT_SYSTEM_PROMPT, user_text)
+        raw = await provider.complete(ADAPT_AND_SUGGEST_SYSTEM_PROMPT, user_text)
     except Exception:
         logger.exception("AI adaptation failed")
         raise HTTPException(502, "AI adaptation failed")
 
-    return {"markdown": _strip_code_fences(raw)}
+    adapted, suggestions = _parse_adapt_response(raw)
+    return {"markdown": adapted, "suggestions": suggestions}
 
 
 # --- Production: serve frontend build ---

@@ -62,8 +62,8 @@ class JobAdapt extends HTMLElement {
     this._errorEl.hidden = true
 
     try {
-      const adapted = await adaptCV(this._baseMarkdown, jobOffer)
-      this.dispatchEvent(new CustomEvent('cv-adapted', { detail: adapted, bubbles: true }))
+      const result = await adaptCV(this._baseMarkdown, jobOffer)
+      this.dispatchEvent(new CustomEvent('cv-adapted', { detail: result, bubbles: true }))
     } catch (err) {
       this._errorEl.textContent = err.message || 'Error al adaptar el CV'
       this._errorEl.hidden = false

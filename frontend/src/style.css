@@ -99,8 +99,9 @@ markdown-editor {
   overflow: hidden;
 }
 
-/* job-adapt always visible at bottom, never pushed out */
-job-adapt {
+/* job-adapt and cv-suggestions always visible at bottom, never pushed out */
+job-adapt,
+cv-suggestions {
   display: block;
   flex-shrink: 0;
 }

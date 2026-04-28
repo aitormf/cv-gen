@@ -38,8 +38,8 @@ export async function adaptCV(markdown, jobOffer) {
     const data = await res.json().catch(() => ({}))
     throw new Error(data.detail || `Adaptation failed: ${res.status}`)
   }
-  const data = await res.json()
-  return data.markdown
+  // Returns { markdown, suggestions }
+  return res.json()
 }
 
 export async function convertDocument(file) {

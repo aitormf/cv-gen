@@ -3,6 +3,7 @@ import './components/template-selector.js'
 import './components/pdf-preview.js'
 import './components/doc-upload.js'
 import './components/job-adapt.js'
+import './components/cv-suggestions.js'
 import { fetchTemplates, checkAiStatus } from './api.js'
 
 const editor = document.querySelector('markdown-editor')
@@ -11,6 +12,7 @@ const preview = document.querySelector('pdf-preview')
 const docUpload = document.querySelector('doc-upload')
 const jobAdapt = document.querySelector('job-adapt')
 
+const cvSuggestions = document.querySelector('cv-suggestions')
 const editorTabs = document.querySelector('.editor-tabs')
 const originalPanel = document.querySelector('.editor-panel--original')
 const adaptedPanel = document.querySelector('.editor-panel--adapted')
@@ -54,12 +56,14 @@ if (docUpload) {
   })
 }
 
-// CV adaptation result
+// CV adaptation result (detail = { markdown, suggestions })
 if (jobAdapt) {
   jobAdapt.addEventListener('cv-adapted', (e) => {
-    adaptedTextarea.value = e.detail
+    const { markdown, suggestions } = e.detail
+    adaptedTextarea.value = markdown
     editorTabs.hidden = false
     switchTab('adapted')
+    if (cvSuggestions) cvSuggestions.suggestions = suggestions
   })
 }
 
