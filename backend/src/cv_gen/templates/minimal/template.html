@@ -22,7 +22,21 @@
         </p>
     </header>
 
-    {% for section in sections %}
+    {% for section in sections if section.section_type == 'profile' %}
+    <section class="cv-section">
+        <h2 class="section-heading">{{ section.heading }}</h2>
+        <div class="section-content">{{ section.content_html | safe }}</div>
+    </section>
+    {% endfor %}
+
+    {% for section in sections if section.section_type == 'skills' %}
+    <section class="cv-section">
+        <h2 class="section-heading">{{ section.heading }}</h2>
+        <div class="section-content">{{ section.content_html | safe }}</div>
+    </section>
+    {% endfor %}
+
+    {% for section in sections if section.section_type not in ('profile', 'skills') %}
     <section class="cv-section">
         <h2 class="section-heading">{{ section.heading }}</h2>
         <div class="section-content">{{ section.content_html | safe }}</div>
